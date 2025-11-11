@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pondok Marisa - Menu & Checkout</title>
+    <link rel="stylesheet" href="PUSAT CSS.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body id="body-pelanggan">
+    
+    <div id="app-container">
+        
+        <div id="view-menu" class="app-view active">
+            
+            <header class="main-header">
+                <div style="width: 24px;"></div> 
+                <h1><i class="fas fa-store"></i> Pondok Marisa</h1>
+                <a href="ADMIN.HTML" class="admin-link">
+                    <i class="fas fa-user-shield"></i> Admin
+                </a>
+            </header>
+            
+            <main class="container">
+                <section class="menu-section">
+                    <h2 class="section-title"><i class="fas fa-utensils"></i> Menu Hari Ini</h2>
+                    <div id="menu-grid" class="menu-grid">
+                        </div>
+                </section>
+            </main>
+            
+            <div id="cart-total-fixed" class="cart-total-fixed" onclick="switchView('checkout')" style="display: none;">
+                <i class="fas fa-shopping-cart"></i> Keranjang (<span id="cart-count">0</span>) | <span id="cart-total-price">Rp 0</span>
+                <i class="fas fa-chevron-right"></i>
+            </div>
+        </div>
+
+        <div id="view-checkout" class="app-view">
+            
+            <header class="main-header">
+                <button onclick="switchView('menu')" class="back-link"><i class="fas fa-arrow-left"></i> Kembali ke Menu</button>
+                <h1><i class="fas fa-receipt"></i> Checkout Pesanan</h1>
+                <div style="width: 24px;"></div>
+            </header>
+
+            <div class="container checkout-container">
+
+                <div class="checkout-details-section">
+                    <div class="card">
+                        <h2 class="section-title-card"><i class="fas fa-user-tag"></i> Detail Pelanggan</h2>
+                        <form id="customer-info-form">
+                            <div class="form-group"><label for="customer-info">No. Meja / Nama Pelanggan (Wajib):</label><input type="text" id="customer-info" required placeholder="Contoh: Meja 10 atau Syafiq (Ambil Sendiri)"></div>
+                            <div class="form-group"><label for="notes">Catatan Tambahan (Opsional):</label><textarea id="notes" rows="3" placeholder="Contoh: Jangan terlalu pedas."></textarea></div>
+                        </form>
+                    </div>
+
+                    <div class="card checkout-review">
+                        <h2 class="section-title-card"><i class="fas fa-list-alt"></i> Ringkasan Pesanan</h2>
+                        <ul id="checkout-items-list" style="list-style: none; padding: 0;"></ul>
+                        
+                        <div class="summary-cost-box">
+                            <div class="cost-row"><span>Subtotal:</span> <span id="checkout-subtotal">Rp 0</span></div>
+                            <div class="cost-row"><span>Pajak/Layanan:</span> <span id="checkout-tax">Gratis</span></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card checkout-payment-section">
+                    <h2 class="section-title-card"><i class="fas fa-wallet"></i> Pilih Metode Pembayaran</h2>
+                    <div id="payment-options" class="payment-options">
+                        <label class="radio-label"><input type="radio" name="payment-method" value="Cash" checked onclick="togglePaymentDisplay()"><span><i class="fas fa-money-bill-wave" style="color: var(--color-success);"></i> Bayar Tunai (Cash)</span></label>
+                        <label class="radio-label" id="transfer-option"><input type="radio" name="payment-method" value="Transfer" onclick="togglePaymentDisplay()"><span><i class="fas fa-exchange-alt" style="color: var(--color-info);"></i> Transfer Bank (<span id="bank-name-display">N/A</span>)</span></label>
+                        <label class="radio-label"><input type="radio" name="payment-method" value="QRIS" id="qris-radio" onclick="togglePaymentDisplay()"><span><i class="fas fa-qrcode" style="color: var(--color-primary);"></i> QRIS (<span id="qris-merchant-display">N/A</span>)</span></label>
+                    </div>
+                    
+                    <div id="cash-box" class="qris-payment-box" style="margin-top: 20px;">
+                        <i class="fas fa-cash-register fa-2x" style="color: var(--color-success);"></i>
+                        <p style="margin-top: 10px; font-weight: 600;">Pembayaran tunai akan diurus oleh kasir saat pesanan Anda siap.</p>
+                    </div>
+                    
+                    <div id="transfer-box" class="qris-payment-box" style="display: none; margin-top: 20px;">
+                        <h4><i class="fas fa-university"></i> Detail Transfer Bank</h4>
+                        <p>Bank: <strong id="transfer-bank">N/A</strong> | No. Rek: <strong id="transfer-rekening">N/A</strong></p>
+                        <p>A/N: <strong id="transfer-an">N/A</strong></p>
+                        <p class="payment-total">Total Bayar: <strong class="text-secondary-checkout" id="transfer-total-amount-display"></strong></p>
+                        <div id="upload-proof-transfer" class="upload-proof-box">
+                            <input type="file" id="proof-upload-transfer" accept="image/*" class="form-control">
+                            <button type="button" class="btn-primary btn-full" onclick="simulateUpload('Transfer')"><i class="fas fa-cloud-upload-alt"></i> Konfirmasi & Unggah Bukti</button>
+                            <p id="transfer-proof-status" class="proof-status-text"></p>
+                        </div>
+                    </div>
+                    
+                    <div id="qris-box" class="qris-payment-box" style="display: none; margin-top: 20px;">
+                        <h4><i class="fas fa-qrcode"></i> Scan QRIS</h4>
+                        <img src="https://via.placeholder.com/200x200?text=SCAN+QRIS+DISINI" alt="QRIS Code" class="qris-image-display">
+                        <p class="payment-merchant">Merchant: <strong id="qris-merchant-info">N/A</strong></p>
+                        <p class="payment-total">Total Bayar: <strong class="text-secondary-checkout" id="qris-total-amount-display"></strong></p>
+                        <div id="upload-proof-qris" class="upload-proof-box">
+                            <input type="file" id="proof-upload-qris" accept="image/*" class="form-control">
+                            <button type="button" class="btn-primary btn-full" onclick="simulateUpload('QRIS')"><i class="fas fa-cloud-upload-alt"></i> Konfirmasi & Unggah Bukti</button>
+                            <p id="qris-proof-status" class="proof-status-text"></p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            
+            <div class="checkout-fixed-footer">
+                <div class="total-display">Total Bayar: <strong id="final-total-amount" class="text-secondary-checkout">Rp 0</strong></div>
+                <button class="btn-primary" onclick="validateAndPlaceOrder()" id="place-order-btn"><i class="fas fa-paper-plane"></i> Buat Pesanan</button>
+            </div>
+
+            <div id="success-modal" class="modal" onclick="closeModal(event, 'success-modal')">
+                <div class="modal-content">
+                    <span class="close-btn" onclick="switchView('menu')">&times;</span>
+                    <h2 style="color: var(--color-success);"><i class="fas fa-check-circle"></i> Pesanan Berhasil!</h2>
+                    <p style="margin-bottom: 20px;">Nomor Pesanan Anda: <strong>#<span id="order-id-display"></span></strong></p>
+                    <div class="success-total-box"><p>Total Bayar:</p><strong id="paid-total-amount">Rp 0</strong></div>
+                    <p id="payment-info-text" class="payment-info-text-modal"></p>
+                    <button class="btn-primary btn-full" style="margin-top: 20px;" onclick="switchView('menu')">Kembali ke Menu Utama</button>
+                </div>
+            </div>
+
+        </div>
+    </div> 
+    
+    <style>
+        /* CSS for View Switching Transition */
+        .app-view {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            overflow-y: auto;
+            background-color: var(--color-background);
+            transition: transform 0.3s ease-in-out;
+            transform: translateX(100%);
+        }
+        #view-menu {
+            transform: translateX(0); 
+            position: relative;
+        }
+        #view-checkout.active {
+            transform: translateX(0);
+            position: absolute; 
+        }
+        #view-menu:not(.active) {
+            transform: translateX(-100%); 
+        }
+    </style>
+    
+    <script>
+        // Data global diinisialisasi di LOGIC.js, tapi cart perlu diakses di sini
+        let currentProof = { Transfer: null, QRIS: null };
+
+        function switchView(targetViewId) {
+            const menuView = document.getElementById('view-menu');
+            const checkoutView = document.getElementById('view-checkout');
+
+            if (targetViewId === 'checkout') {
+                if (cart.length === 0) {
+                     alert('Keranjang Anda kosong. Kembali ke Menu.');
+                     return;
+                }
+                menuView.classList.remove('active');
+                checkoutView.classList.add('active');
+                
+                loadCheckoutInfo();
+                renderCheckoutSummary();
+                togglePaymentDisplay();
+            } else if (targetViewId === 'menu') {
+                document.getElementById('success-modal').style.display = 'none';
+                checkoutView.classList.remove('active');
+                menuView.classList.add('active');
+                
+                currentProof = { Transfer: null, QRIS: null };
+                document.getElementById('proof-upload-transfer').value = '';
+                document.getElementById('proof-upload-qris').value = '';
+                document.getElementById('transfer-proof-status').innerHTML = '';
+                document.getElementById('qris-proof-status').innerHTML = '';
+                
+                renderMenu(); 
+            }
+        }
+        
+        function simulateUpload(method) {
+            const fileInput = document.getElementById(`proof-upload-${method.toLowerCase()}`);
+            const statusElement = document.getElementById(`${method.toLowerCase()}-proof-status`);
+            
+            if (fileInput.files.length === 0) {
+                statusElement.innerHTML = '<i class="fas fa-exclamation-triangle" style="color: var(--color-danger);"></i> Pilih file gambar dulu.';
+                currentProof[method] = null;
+                return;
+            }
+            
+            const file = fileInput.files[0];
+            
+            currentProof[method] = {
+                method: method,
+                name: file.name,
+                size: file.size,
+                simulatedUrl: `https://simulasi.link/bukti/${method.toLowerCase()}-${Date.now()}-${file.name}` 
+            };
+
+            statusElement.innerHTML = `<i class="fas fa-check-circle" style="color: var(--color-success);"></i> Bukti **${file.name}** berhasil diunggah!`;
+            alert(`Bukti pembayaran ${method} berhasil diunggah! Anda sekarang bisa menekan tombol "Buat Pesanan".`);
+        }
+
+        function validateAndPlaceOrder() {
+            const paymentMethod = document.querySelector('input[name="payment-method"]:checked').value;
+            
+            if (paymentMethod !== 'Cash') {
+                if (!currentProof[paymentMethod]) {
+                    alert('Mohon unggah bukti pembayaran Anda terlebih dahulu untuk metode ' + paymentMethod + '.');
+                    return;
+                }
+            }
+            
+            if (document.getElementById('customer-info').value.trim() === '') {
+                 alert('Mohon isi Nomor Meja atau Nama Pelanggan!');
+                 document.getElementById('customer-info').focus();
+                 return;
+            }
+            
+            placeOrder(currentProof[paymentMethod] ? currentProof[paymentMethod] : null);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('view-checkout').classList.remove('active');
+            document.getElementById('view-menu').classList.add('active');
+            renderMenu(); 
+
+            document.querySelectorAll('#view-checkout input[name="payment-method"]').forEach(radio => {
+                radio.addEventListener('change', togglePaymentDisplay);
+            });
+        });
+    </script>
+
+    <script src="LOGIC.js"></script>
+</body>
+</html>

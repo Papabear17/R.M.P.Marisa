@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard Pondok Marisa</title>
+    <link rel="stylesheet" href="PUSAT CSS.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body id="body-admin">
+    
+    <div id="admin-login-overlay" class="login-overlay">
+        <div class="login-card">
+            <h2 class="login-title"><i class="fas fa-lock"></i> Akses Admin</h2>
+            <p class="login-subtitle">Masukkan kata sandi untuk melanjutkan.</p>
+            <div class="form-group">
+                <label for="admin-password">Kata Sandi:</label>
+                <input type="password" id="admin-password" placeholder="Sandi default: 1234">
+            </div>
+            <button class="btn-primary btn-full" onclick="checkAdminPassword()">Masuk</button>
+            <a href="PELANGGAN.HTML" class="back-to-menu-link">
+                <i class="fas fa-arrow-left"></i> Kembali ke Menu
+            </a>
+        </div>
+    </div>
+    
+    <div id="admin-dashboard-content" style="display: none;">
+        <header class="main-header admin-header">
+            <h1><i class="fas fa-user-shield"></i> Admin Panel</h1>
+            <button onclick="logoutAdmin()" class="btn-logout">
+                <i class="fas fa-sign-out-alt"></i> Keluar
+            </button>
+        </header>
+
+        <main class="container admin-container">
+            <div class="tab-navigation">
+                <button class="tab-btn-admin active" id="orders-tab-btn" onclick="showAdminTab('orders-tab', this)">
+                    <i class="fas fa-receipt"></i> Pesanan (<span id="pending-count">0</span>)
+                </button>
+                <button class="tab-btn-admin" id="menu-tab-btn" onclick="showAdminTab('menu-tab', this)">
+                    <i class="fas fa-hamburger"></i> Menu Produk
+                </button>
+                <button class="tab-btn-admin" id="settings-tab-btn" onclick="showAdminTab('settings-tab', this)">
+                    <i class="fas fa-cog"></i> Pengaturan
+                </button>
+            </div>
+            
+            <div id="orders-tab" class="tab-content-admin active">
+                <h2 class="section-title"><i class="fas fa-clipboard-list"></i> Manajemen Pesanan</h2>
+                <div class="table-responsive">
+                    <table class="admin-table" id="orders-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Pelanggan</th>
+                                <th>Metode Bayar</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th style="width: 25%;">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="menu-tab" class="tab-content-admin">
+                <h2 class="section-title"><i class="fas fa-hamburger"></i> Katalog Menu</h2>
+                <button class="btn-primary" style="margin-bottom: 15px;" onclick="openMenuForm()">
+                    <i class="fas fa-plus-circle"></i> Tambah Produk Baru
+                </button>
+                <div class="table-responsive">
+                    <table class="admin-table" id="menu-admin-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 50px;">ID</th>
+                                <th style="width: 40%;">Nama Produk</th>
+                                <th style="width: 15%;">Harga</th>
+                                <th style="width: 15%;">Stok</th>
+                                <th style="width: 15%;">Kategori</th>
+                                <th style="width: 10%;">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="settings-tab" class="tab-content-admin">
+                <form id="settings-form" class="settings-form-card" onsubmit="saveSettings(event)">
+                    
+                    <h2 class="section-title-card"><i class="fas fa-info-circle"></i> Detail Struk & Alamat</h2>
+                    
+                    <div class="form-group">
+                        <label for="restaurantAddress">Alamat Restoran (Dicetak di Struk):</label>
+                        <input type="text" id="restaurantAddress" required placeholder="Contoh: Jl. Kenangan Indah No. 45, BSD City">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="taxRate">Persentase Pajak/Layanan (PPN) %:</label>
+                        <input type="number" id="taxRate" required min="0" max="100" step="0.1" placeholder="Contoh: 10 untuk 10%">
+                    </div>
+                    
+                    <h2 class="section-title-card" style="margin-top: 30px;"><i class="fas fa-qrcode"></i> Pengaturan QRIS & Transfer</h2>
+
+                    <div class="form-group"><label for="qrisMerchantName">Nama Merchant QRIS:</label><input type="text" id="qrisMerchantName" required></div>
+                    <div class="form-group">
+                        <label for="qrisImageUrl">URL Gambar QRIS:</label>
+                        <input type="text" id="qrisImageUrl" placeholder="Contoh: https://linkgambar.com/qris.png">
+                    </div>
+                    <div class="qris-preview-container">
+                        <img id="qris-preview" src="https://via.placeholder.com/150x150?text=QRIS+Preview" alt="QRIS Preview">
+                        <p class="qris-hint">*Gunakan URL gambar publik (JPG/PNG)</p>
+                    </div>
+
+                    <h3 class="form-section-title" style="margin-top: 30px;"><i class="fas fa-university"></i> Informasi Transfer Bank</h3>
+                    
+                    <div class="form-group"><label for="bankName">Nama Bank:</label><input type="text" id="bankName" required></div>
+                    <div class="form-group"><label for="bankAccountNumber">Nomor Rekening:</label><input type="text" id="bankAccountNumber" required></div>
+                    <div class="form-group"><label for="accountHolderName">Nama Pemilik Rekening (A/N):</label><input type="text" id="accountHolderName" required></div>
+                    
+                    <button type="submit" class="btn-primary btn-full" style="margin-top: 30px;"><i class="fas fa-save"></i> Simpan Pengaturan</button>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <div id="struk-modal" class="modal" onclick="closeModal(event, 'struk-modal')">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal(null, 'struk-modal')">&times;</span>
+            <div id="struk-content">
+                </div>
+            <button class="btn-secondary btn-full print-btn" onclick="printStruk()">
+                <i class="fas fa-print"></i> Cetak Struk
+            </button>
+        </div>
+    </div>
+    
+    <div id="proof-modal" class="modal" onclick="closeModal(event, 'proof-modal')">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal(null, 'proof-modal')">&times;</span>
+            <div id="proof-details">
+                </div>
+        </div>
+    </div>
+    
+    <div id="menu-form-modal" class="modal" onclick="closeModal(event, 'menu-form-modal')">
+        <div class="modal-content form-modal-content">
+            <span class="close-btn" onclick="closeModal(null, 'menu-form-modal')">&times;</span>
+            <h2 id="form-title" class="section-title-card"><i class="fas fa-plus-circle"></i> Tambah Produk Baru</h2>
+            <form id="menu-form" onsubmit="saveMenuItem(event)">
+                <input type="hidden" id="menu-item-id">
+                
+                <div class="form-group">
+                    <label for="menu-name">Nama Produk:</label>
+                    <input type="text" id="menu-name" required placeholder="Contoh: Kopi Susu Panas">
+                </div>
+                <div class="form-group">
+                    <label for="menu-price">Harga (Rp):</label>
+                    <input type="number" id="menu-price" required min="1000" step="1000" placeholder="Contoh: 15000">
+                </div>
+                <div class="form-group">
+                    <label for="menu-stock">Stok (Porsi/Unit):</label>
+                    <input type="number" id="menu-stock" required min="0" placeholder="Contoh: 20">
+                </div>
+                <div class="form-group">
+                    <label for="menu-category">Kategori:</label>
+                    <select id="menu-category" required>
+                        <option value="">Pilih Kategori</option>
+                        <option value="Makanan Berat">Makanan Berat</option>
+                        <option value="Snack">Snack</option>
+                        <option value="Minuman">Minuman</option>
+                        <option value="Dessert">Dessert</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="menu-image-file">File Gambar Produk (.jpg, .png):</label>
+                    <input type="file" id="menu-image-file" accept="image/*" class="form-control">
+                    <div class="qris-preview-container" style="margin-top: 15px;">
+                        <img id="menu-image-preview" src="" alt="Pratinjau Gambar Produk" style="max-width: 100%; height: 120px; border-radius: 8px; border: 3px solid var(--color-border); display: none;">
+                        <p class="qris-hint">*Upload gambar akan disimpan sebagai data Base64.</p>
+                    </div>
+                </div>
+                
+                <div class="form-actions-modal">
+                    <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Simpan Produk</button>
+                    <button type="button" class="btn-danger" id="delete-menu-btn" onclick="deleteMenuItem()" style="display: none;"><i class="fas fa-trash"></i> Hapus</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <script>
+        const ADMIN_PASS = "1234"; 
+        
+        function checkAdminPassword() {
+            const inputPass = document.getElementById('admin-password').value;
+            if (inputPass === ADMIN_PASS) {
+                document.getElementById('admin-login-overlay').classList.add('hidden'); 
+                setTimeout(() => {
+                    document.getElementById('admin-login-overlay').style.display = 'none';
+                    document.getElementById('admin-dashboard-content').style.display = 'block';
+                    document.getElementById('admin-dashboard-content').classList.add('fade-in'); 
+                    
+                    loadSettings();
+                    const ordersTabBtn = document.getElementById('orders-tab-btn');
+                    showAdminTab('orders-tab', ordersTabBtn);
+                    
+                }, 300);
+            } else {
+                alert("Kata sandi salah! Silakan coba lagi.");
+                document.getElementById('admin-password').value = '';
+            }
+        }
+
+        function logoutAdmin() {
+            document.getElementById('admin-dashboard-content').classList.remove('fade-in');
+            document.getElementById('admin-dashboard-content').style.display = 'none';
+            document.getElementById('admin-login-overlay').style.display = 'flex';
+            document.getElementById('admin-login-overlay').classList.remove('hidden');
+            document.getElementById('admin-password').value = '';
+            alert('Anda telah keluar dari dashboard Admin.');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const qrisInput = document.getElementById('qrisImageUrl');
+            const qrisPreview = document.getElementById('qris-preview');
+            
+            if (qrisInput && qrisPreview) {
+                qrisInput.addEventListener('input', () => {
+                    if (qrisInput.value.startsWith('http')) {
+                        qrisPreview.src = qrisInput.value;
+                    } else {
+                        qrisPreview.src = "https://via.placeholder.com/150x150?text=QRIS+Preview";
+                    }
+                });
+            }
+            
+            // Logika pratinjau gambar produk yang diupload
+            const menuImageFile = document.getElementById('menu-image-file');
+            const menuImagePreview = document.getElementById('menu-image-preview');
+            if (menuImageFile && menuImagePreview) {
+                 menuImageFile.addEventListener('change', (event) => {
+                    const file = event.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            menuImagePreview.src = e.target.result;
+                            menuImagePreview.style.display = 'block';
+                        };
+                        reader.readAsDataURL(file);
+                    } else {
+                        menuImagePreview.src = '';
+                        menuImagePreview.style.display = 'none';
+                    }
+                });
+            }
+
+
+            document.getElementById('admin-login-overlay').style.display = 'flex';
+            document.getElementById('admin-dashboard-content').style.display = 'none';
+            
+            if (document.getElementById('orders-tab-btn')) {
+                 document.getElementById('orders-tab-btn').classList.add('active');
+            }
+        });
+    </script>
+    <script src="LOGIC.js"></script>
+</body>
+</html>
